@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <title>compteur</title>
+    </head>
+
+    <body>
+        <div>
+            <header>
+                <h1>compteur</h1>
+            </header>
+            <nav>
+                <p>
+                    <a href="/">Home</a>
+                </p>
+                <p>
+                    <a href="/contact">Contact</a>
+                </p>
+            </nav>
+
+            <div>
+                <h1>Je vais compter jusqu'à <%= compteur %></h1>
+
+                <p>
+                    <%
+                    for(var i = 1 ; i <= compteur ; i++) {
+                    %>
+
+                    <%= i %>...
+
+                    <% } %>
+                </p>
+
+                <p>
+                    Tant que j'y suis, je prends un nom au hasard qu'on m'a envoyé :
+                    <%= noms[Math.round(Math.random() * (noms.length - 1))] %>
+                </p>
+            </div>
+
+            <footer>
+                <p>
+                    &copy; Copyright  by Aicha Diakite
+                </p>
+            </footer>
+        </div>
+    </body>
+</html>
