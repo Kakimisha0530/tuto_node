@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>socket.io</title>
+    </head>
+
+    <body>
+        <div>
+            <header>
+                <h1>Test Socket</h1>
+            </header>
+
+            <div>
+                <p>Salut !!!!!</p>
+                <p><input type="button" value="Embêter le serveur" id="poke" /></p>
+            </div>
+        </div>
+        <script src="js/jquery-1.9.1.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io.connect('http://localhost:8080');
+            
+            // On demande le pseudo au visiteur...
+            var pseudo = prompt('Quel est votre pseudo ?');
+            
+            // Et on l'envoie avec le signal "petit_nouveau" (pour le différencier de "message")
+            socket.emit('petit_nouveau', pseudo);
+            
+            //On peut recuperer les evenements envoyés par le serveur
+            socket.on('message', function(params) {
+                alert('Le serveur a un message pour vous : ' + params.texte);
+            });
+            
+            //Et le client peut aussi envoyer un evenement au serveur
+            $('#poke').click(function () {
+                socket.emit('message', 'Salut serveur, ça va ?');
+            })
+        </script>
+    </body>
+</html>
