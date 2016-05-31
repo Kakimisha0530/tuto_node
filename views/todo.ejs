@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <title>todo</title>
+        <style>
+            a{
+                text-decoration: none;
+            }
+            a.del{
+                color:red;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <header>
+                <h1>Ma todolist</h1>
+            </header>
+            <div>
+                <ul class="liste">
+                    <% todolist.forEach(function(todo, index) { %>
+                        <li><a href="/supprimer/<%= index %>" class="del">✘</a> <%= todo %></li>
+                    <% }); %>
+                </ul>
+                <form action="/ajouter" method="post">                    
+                    <p>
+                        Que dois-je faire ?
+                        <input type="text" id="todoval" name="todoval" />
+                        <button id="todosubmit" type="submit">
+                            Valider
+                        </button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
