@@ -7,7 +7,7 @@
         Remove this if you use the .htaccess -->
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-        <title>cha</title>
+        <title>chat</title>
         <meta name="description" content="">
         <meta name="author" content="Aicha Diakite">
 
@@ -16,37 +16,125 @@
         <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <style>
+            .userView{
+                font-style:italic;
+            }
+            .deconnecte{
+                font-style:italic;
+                color:red;
+            }
+            .username{
+                font-style: italic;
+                font-weight: bold;
+                padding: 2px 5px;
+                margin: 0 5px 0 0;
+            }
+        </style>
     </head>
 
     <body>
         <div>
             <header>
-                <h1>TP Super Chat</h1>
+                <h1>TP Super Chat avec node et Socket.io</h1>
             </header>
 
-            <div class="connect">
-                <p>Choisissez un pseudo : <input type="text" id="username"/></p>
-                <p>Choisissez une couleur : <input type="color" id="color"/></p>                
+            <div id="connect">
+                <p>
+                    Choisissez un pseudo :
+                    <input type="text" id="username"/>
+                </p>
+                <p>
+                    Choisissez une couleur :
+                    <input type="color" id="usercolor"/>
+                </p>
+                <p>
+                    <button id="chatConnect">
+                        Entrer dans le chat !
+                    </button>
+                </p>
             </div>
-            
-            <div class="chatBloc">
+
+            <div id="chatBloc" style="display: none">
                 <div class="form">
                     <input type="text" id="msg"/>
-                    <button id="send">Envoyer</button>
+                    <button id="send">
+                        Envoyer
+                    </button>
                 </div>
-                <div id="msgBloc">
-                    <p id="msgModel" style="display: block">
-                        <span class="name"></span>
-                        <span></span>
-                    </p>
-                </div>
+                <div id="msgBloc"></div>
             </div>
-            <script src="js/jquery-1.9.1.min.js"></script>
+            <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+            <!--script src="../js/jquery-1.9.1.min.js"></script-->
             <script src="/socket.io/socket.io.js"></script>
             <script>
-                var socket = io.connect('http://localhost:8080');
-                //Les evenements client
+                var socket = io.connect('http://localhost:12345');
+                var username = "",usercolor="";
+                $(document).ready(function() {
+                    $(window).bind('beforeunload', function(){
+                        if(username != ""){
+                            socket.emit('deconnexion', {
+                                username : username
+                            });
+                        }
+                    });
+                    
+                    //à la connexion on transmet les infos user au serveur
+                    $("#chatConnect").click(function() {
+                        username = $("#username").val();
+                        usercolor = $("#usercolor").val();
+                        socket.emit('nouvelle_connexion', {
+                            username : $("#username").val(),
+                            usercolor : $("#usercolor").val()
+                        });
+                        $("#connect").css("display", "none");
+                        $("#chatBloc").css("display", "block");
+                    });
+                });
+                //à l'envoi d'un message on le transmet avec les infos user au serveur
+                //et on l'affiche aussi
+                $('#send').click(function() {
+                    var params = {
+                        username : username,
+                        usercolor : usercolor,
+                        texte : $("#msg").val()
+                    };
+                    socket.emit('message', params);
+                    var bloc = $("<p class='msgView'>");
+                    bloc.append($("<span class='username'>").text(params.username).css("background", params.usercolor));
+                    bloc.append($("<span>", {
+                        html : params.texte
+                    }));
+                    $("#msgBloc").append(bloc);
+                    $("#msg").val("");
+                });
+
+                //à la reception d'un nouveau message in l'affiche
+                socket.on('message', function(params) {
+                    var bloc = $("<p class='msgView'>");
+                    bloc.append($("<span class='username'>").text(params.username).css("background", params.usercolor));
+                    bloc.append($("<span>", {
+                        html : params.texte
+                    }));
+                    $("#msgBloc").append(bloc);
+                });
                 
+                //à la connexion d'un nouvel utilisateur on affiche qu'il est connecté
+                socket.on('nouvelle_connexion', function(params) {
+                    var bloc = $("<p class='userView'>");
+                    bloc.append($("<span>", {
+                        html : params.username + " a rejoint le chat."
+                    }).css("color", params.usercolor));
+                    $("#msgBloc").append(bloc);
+                });
+                
+                //à la deconnexion d'un utilisateur on affiche qu'il s'est déconnecté
+                socket.on('nouvelle_connexion', function(params) {
+                    var bloc = $("<p class='deconnecte'>");
+                    bloc.append($("<span>", {html : params.username + " a quitté le chat."}));
+                    $("#msgBloc").append(bloc);
+                });
+
             </script>
         </div>
     </body>

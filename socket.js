@@ -23,6 +23,7 @@ io.sockets.on('connection', function (socket) {
     // Dès qu'on nous donne un pseudo, on le stocke en variable de session
     socket.on('petit_nouveau', function(pseudo) {
         socket.pseudo = pseudo;
+        console.log(socket.pseudo);
     });
     
     //Il pet aussi recupérer des evenements envoyés par le client
@@ -33,4 +34,4 @@ io.sockets.on('connection', function (socket) {
 });
 
 
-server.listen(8080);
+server.listen(12345);

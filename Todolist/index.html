@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <title>Todolist temps réel</title>
+        <style>
+			table {
+				border-collapse: collapse;
+				border: 1px solid black;
+				width: 100%
+			}
+			th {
+				padding: 10px 0;
+				background-color: black;
+				color: white;
+			}
+			td {
+				padding: 10px;
+				border-bottom: 1px solid black;
+			}
+			td {
+				text-align: center;
+			}
+			td.tache {
+				text-align: left;
+			}
+			td.supprimer {
+				color: red;
+				font-size: 25px;
+			}
+			.add {
+				text-align: center;
+				margin: 10px 0 25px 0;
+			}
+			input#todoVal {
+				border-radius: 5px;
+				border: 1px solid black;
+				height: 25px;
+				width: 350px;
+			}
+			button#addTodo {
+				height: 30px;
+				width: 100px;
+				border-radius: 5px;
+				border: none;
+				background: black;
+				color: white;
+			}
+			.done {
+				background: rgba(182, 226, 198, 0.57);
+			}
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <h1>TP : Todolist en temps réel</h1>
+            <div class="main">
+                <div class="add">
+                    <input type="text" id="todoVal"/>
+                    <button id="addTodo">
+                        Ajouter
+                    </button>
+                </div>
+                <div class="blocList">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tâches</th>
+                                <th>Status</th>
+                                <th>Supprimer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todoList">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+            <script src="/socket.io/socket.io.js"></script>
+            <script>
+                //On initialise socket.io en précisant l'adresse de notre site
+                var socket = io.connect('http://localhost:12345');
+
+                //On defini nos evenements Jquery
+                $(document).ready(function() {
+                    //au click sur le bouton d'id "addTodo" on envoi un évènement "ajout" au serveur
+                    //si le champ pour la tache n'est pas vide
+                    $('#addTodo').click(function() {
+                        var params = {
+                            texte : $("#todoVal").val(),
+                            status : 0
+                        };
+                        socket.emit('ajout', params);
+                        $("#todoVal").val("");
+                    });
+                });
+
+                //à la reception d'un evenement "update" , on met à jour la todoList
+                socket.on('update', function(liste) {
+                    $("#todoList").empty();
+                    $.each(liste, function(ind, val) {
+                        var done = (val.status > 0) ? " done" : "";
+                        var tr = $("<tr>");
+                        tr.append($("<td class='tache" + done + "'>" + val.texte + "</td>"));
+                        var td_mod = $("<td class='modifier" + done + "'><input type=\"checkbox\" " + ((val.status > 0) ? "checked" : "") + "/></td>");
+                        //à la modification d'une tache on envoi un évènement "modification" au serveur avec l'index de la tache
+                        td_mod.change(function() {
+                            socket.emit('modification', ind);
+                        });
+                        tr.append(td_mod);
+                        var td_sup = $("<td  class='supprimer" + done + "'><span>✘</span></td>");
+                        //à la suppression d'une tache on envoi un évènement "suppression" au serveur avec l'index de la tache
+                        td_sup.click(function() {
+                            socket.emit('suppression', ind);
+                        });
+                        tr.append(td_sup);
+                        $("#todoList").append(tr);
+                    });
+                });
+            </script>
+        </div>
+    </body>
+</html>
